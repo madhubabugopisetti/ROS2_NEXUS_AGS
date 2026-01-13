@@ -229,3 +229,22 @@ chmod +x align_shoulder.py
 - ![Found box](./src/images/image-12.png)
 - Terminal 5: ros2 run ags_auto align_shoulder
 - ![detect box](./src/images/image-13.png)
+
+# GOAL 6: Align forearm
+```
+cd ~/ros2_nexus_ags_ws/src/ags_auto/ags_auto
+touch align_forearm.py
+chmod +x align_forearm.py
+```
+- Add to console_scripts ```'align_forearm = ags_auto.align_forearm:main',```
+- [BUILD](#build)
+- Terminal 1: ros2 launch ags_description gazebo_rviz.launch.py
+- Terminal 2: ros2 control load_controller --set-state active joint_state_broadcaster / ros2 control load_controller --set-state active arm_controller
+- Terminal 3: ros2 run ags_auto camera_view
+- ![Before searching](./src/images/image-11.png)
+- Terminal 4: ros2 run ags_auto search_box
+- ![Found box](./src/images/image-12.png)
+- Terminal 5: ros2 run ags_auto align_shoulder
+- ![aling y axis](./src/images/image-13.png)
+- Terminal 6: ros2 run ags_auto align_forearm
+- ![align x axis](./src/images/image-14.png)

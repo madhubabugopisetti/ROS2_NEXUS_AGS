@@ -59,3 +59,9 @@ touch ags_description/launch/gazebo_rviz.launch.py
 touch ags_description/rviz/ags.rviz
 touch ags_description/urdf/ags.xacro
 ```
+
+### STEP 3: Create world and render in gazebo
+- Add world, walls in world.sdf
+- Add gazebo node in gazebo_rviz.launch.py
+- Terminal 1: ros2 launch ags_description gazebo_rviz.launch.py
+- ![world](./src/images/image.png)

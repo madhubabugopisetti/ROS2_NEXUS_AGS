@@ -70,7 +70,7 @@
         <child link="elbow_link" />
         <origin xyz="0 0 0.4" />
         <axis xyz="1 0 0" />
-        <limit lower="0" upper="3.14" effort="300" velocity="1" />
+        <limit lower="-1.57" upper="1.57" effort="300" velocity="1" />
     </joint>
     <link name="elbow_link">
         <visual>

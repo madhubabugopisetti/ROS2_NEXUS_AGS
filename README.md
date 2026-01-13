@@ -37,3 +37,25 @@ cd ~/ros2_nexus_ags_ws/src
 source /opt/ros/jazzy/setup.bash
 ros2 pkg create ags_description --build-type ament_cmake
 ```
+
+### STEP 2: Creating folders structure
+ags_description/
+    ├── config/
+        ├── 
+    ├── launch/
+        ├── gazebo_rviz.launch.py
+    ├── urdf/
+        ├── ags.xacro
+    ├── worlds/
+        ├── world.sdf
+    ├── rviz/
+        ├── ags.rviz
+
+```
+cd ~/ros2_nexus_ags_ws/src
+mkdir -p ags_description/{config,launch,urdf,worlds,rviz}
+touch ags_description/worlds/world.sdf
+touch ags_description/launch/gazebo_rviz.launch.py
+touch ags_description/rviz/ags.rviz
+touch ags_description/urdf/ags.xacro
+```

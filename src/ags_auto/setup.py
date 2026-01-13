@@ -27,6 +27,7 @@ setup(
             'camera_view = ags_auto.camera_view:main',
             'search_box = ags_auto.search_box:main',
             'detect_box = ags_auto.detect_box:main',
+            'align_shoulder = ags_auto.align_shoulder:main',
         ],
     },
 )

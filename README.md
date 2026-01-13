@@ -213,13 +213,13 @@ chmod +x search_box.py
 - ![Found box](./src/images/image-12.png)
 
 
-# GOAL 6: Detect the box and draw green rectangle
+# GOAL 6: Align Shoulder
 ```
 cd ~/ros2_nexus_ags_ws/src/ags_auto/ags_auto
-touch detect_box.py
-chmod +x detect_box.py
+touch align_shoulder.py
+chmod +x align_shoulder.py
 ```
-- Add to console_scripts ```'detect_box = ags_auto.detect_box:main',```
+- Add to console_scripts ```'align_shoulder = ags_auto.align_shoulder:main',```
 - [BUILD](#build)
 - Terminal 1: ros2 launch ags_description gazebo_rviz.launch.py
 - Terminal 2: ros2 control load_controller --set-state active joint_state_broadcaster / ros2 control load_controller --set-state active arm_controller
@@ -227,5 +227,5 @@ chmod +x detect_box.py
 - ![Before searching](./src/images/image-11.png)
 - Terminal 4: ros2 run ags_auto search_box
 - ![Found box](./src/images/image-12.png)
-- Terminal 5: ros2 run ags_auto detect_box
+- Terminal 5: ros2 run ags_auto align_shoulder
 - ![detect box](./src/images/image-13.png)

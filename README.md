@@ -39,6 +39,7 @@ ros2 pkg create ags_description --build-type ament_cmake
 ```
 
 ### STEP 2: Creating folders structure
+```
 ags_description/
     ├── config/
         ├── 
@@ -50,7 +51,7 @@ ags_description/
         ├── world.sdf
     ├── rviz/
         ├── ags.rviz
-
+```
 ```
 cd ~/ros2_nexus_ags_ws/src
 mkdir -p ags_description/{config,launch,urdf,worlds,rviz}
@@ -61,7 +62,26 @@ touch ags_description/urdf/ags.xacro
 ```
 
 ### STEP 3: Create world and render in gazebo
+- Add folder config, launch, urdf, worlds, rviz, maps to CMakeLists.txt
 - Add world, walls in world.sdf
 - Add gazebo node in gazebo_rviz.launch.py
 - Terminal 1: ros2 launch ags_description gazebo_rviz.launch.py
 - ![world](./src/images/image.png)
+
+### STEP 4: Create model and render in gazebo
+- Add robot with these
+```
+world
+└── world_joint → base_link
+    ├── shoulder_joint → shoulder_link
+    │   └── elbow_joint → elbow_link
+    │       └── forearm_joint → forearm_link
+    │           └── wrist_pitch_joint → wrist_pitch_link
+    │               └── wrist_roll_joint → wrist_roll_link
+    │                   └── gripper_mount_joint → gripper_base
+    │                       ├── left_finger_joint → left_finger
+    │                       └── right_finger_joint → right_finger
+```
+- Add spawn robot in gazebo_rviz.launch.py
+- Terminal 1: ros2 launch ags_description gazebo_rviz.launch.py
+- ![world + model](./src/images/image-1.png)

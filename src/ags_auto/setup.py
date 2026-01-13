@@ -25,6 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
             'camera_view = ags_auto.camera_view:main',
+            'search_box = ags_auto.search_box:main',
             'detect_box = ags_auto.detect_box:main',
         ],
     },

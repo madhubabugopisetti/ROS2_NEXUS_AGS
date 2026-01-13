@@ -193,28 +193,27 @@ chmod +x camera_view.py
 ```
 - Add to console_scripts ```'camera_view = ags_auto.camera_view:main',```
 - [BUILD](#build)
-- Terminal 1: ros2 launch ags_description gazebo_rviz.launch.py
-- Terminal 2: ros2 control load_controller --set-state active joint_state_broadcaster / ros2 control load_controller --set-state active arm_controller
-- Terminal 3:
-```
-ros2 topic pub --once /arm_controller/joint_trajectory trajectory_msgs/msg/JointTrajectory "
-joint_names:
-- shoulder_joint
-- elbow_joint
-- forearm_joint
-- wrist_pitch_joint
-- wrist_roll_joint
-- left_finger_joint
-- right_finger_joint
-points:
-- positions: [1.6, 1.0, 1.5, 0.55, 0.0, 0.01, 0.01]
-  time_from_start: {sec: 3}
-"
-```
+
 - Terminal 4: ros2 run ags_auto camera_view
 - ![dock view](./src/images/image-10.png)
 
-# GOAL 5: Detect the box and draw green rectangle
+# GOAL 5: Find the box
+```
+cd ~/ros2_nexus_ags_ws/src/ags_auto/ags_auto
+touch search_box.py
+chmod +x search_box.py
+```
+- Add to console_scripts ```'search_box = ags_auto.search_box:main',```
+- [BUILD](#build)
+- Terminal 1: ros2 launch ags_description gazebo_rviz.launch.py
+- Terminal 2: ros2 control load_controller --set-state active joint_state_broadcaster / ros2 control load_controller --set-state active arm_controller
+- Terminal 3: ros2 run ags_auto camera_view
+- ![Before searching](./src/images/image-11.png)
+- Terminal 4: ros2 run ags_auto search_box
+- ![Found box](./src/images/image-12.png)
+
+
+# GOAL 6: Detect the box and draw green rectangle
 ```
 cd ~/ros2_nexus_ags_ws/src/ags_auto/ags_auto
 touch detect_box.py
@@ -224,23 +223,9 @@ chmod +x detect_box.py
 - [BUILD](#build)
 - Terminal 1: ros2 launch ags_description gazebo_rviz.launch.py
 - Terminal 2: ros2 control load_controller --set-state active joint_state_broadcaster / ros2 control load_controller --set-state active arm_controller
-- Terminal 3:
-```
-ros2 topic pub --once /arm_controller/joint_trajectory trajectory_msgs/msg/JointTrajectory "
-joint_names:
-- shoulder_joint
-- elbow_joint
-- forearm_joint
-- wrist_pitch_joint
-- wrist_roll_joint
-- left_finger_joint
-- right_finger_joint
-points:
-- positions: [1.6, 1.0, 1.5, 0.55, 0.0, 0.01, 0.01]
-  time_from_start: {sec: 3}
-"
-```
-- Terminal 4: ros2 run ags_auto camera_view
-- ![dock view](./src/images/image-10.png)
+- Terminal 3: ros2 run ags_auto camera_view
+- ![Before searching](./src/images/image-11.png)
+- Terminal 4: ros2 run ags_auto search_box
+- ![Found box](./src/images/image-12.png)
 - Terminal 5: ros2 run ags_auto detect_box
-- ![detect box](./src/images/image-11.png)
+- ![detect box](./src/images/image-13.png)

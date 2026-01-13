@@ -114,3 +114,30 @@ points:
 "
 ```
 - ![After](./src/images/image-3.png)
+
+
+### STEP 2: Move model via commands in gazebo and rviz
+- Open rviz2 and save config as ags.rviz
+- Add rviz node
+- [BUILD](#build)
+- Terminal 1: ros2 launch ags_description gazebo_rviz.launch.py
+- ![Before jsp](./src/images/image-4.png)
+- Terminal 2: ros2 control load_controller --set-state active joint_state_broadcaster / ros2 control load_controller --set-state active arm_controller
+- ![After jsp](./src/images/image-5.png)
+- Terminal 3:
+```
+ros2 topic pub --once /arm_controller/joint_trajectory trajectory_msgs/msg/JointTrajectory "
+joint_names:
+- shoulder_joint
+- elbow_joint
+- forearm_joint
+- wrist_pitch_joint
+- wrist_roll_joint
+- left_finger_joint
+- right_finger_joint
+points:
+- positions: [0.5, 1.0, 0.5, 0.3, 0.0, 0.01, 0.01]
+  time_from_start: {sec: 3}
+"
+```
+- ![gazebo+rviz](./src/images/image-6.png)

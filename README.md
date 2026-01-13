@@ -141,3 +141,10 @@ points:
 "
 ```
 - ![gazebo+rviz](./src/images/image-6.png)
+
+# GOAL 3: See the object via camera
+
+### STEP 1: Add object
+- Add a model in world.sdf
+- gz sim -r ~/ros2_nexus_ags_ws/src/ags_description/worlds/world.sdf
+- ![alt text](./src/images/image-7.png)

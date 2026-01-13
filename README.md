@@ -174,3 +174,25 @@ points:
 "
 ```
 - ![After rotating](./src/images/image-9.png)
+
+# GOAL 4: Render the object in dock view
+
+- Terminal 1: 
+```
+cd ~/ros2_nexus_ags_ws/src
+ros2 pkg create ags_auto --build-type ament_python --dependencies rclpy sensor_msgs cv_bridge geometry_msgs trajectory_msgs
+
+cd ~/ros2_nexus_ags_ws
+colcon build
+source install/setup.bash
+```
+```
+cd ~/ros2_nexus_ags_ws/src/ags_auto/ags_auto
+touch camera_view.py
+chmod +x camera_view.py
+```
+- Add to console_scripts ```'camera_view = ags_auto.camera_view:main',```
+- Terminal 1: ros2 launch ags_description gazebo_rviz.launch.py
+- Terminal 2: ros2 control load_controller --set-state active joint_state_broadcaster / ros2 control load_controller --set-state active arm_controller
+- Terminal 3: ros2 run ags_auto camera_view
+- ![dock view](./src/images/image-10.png)

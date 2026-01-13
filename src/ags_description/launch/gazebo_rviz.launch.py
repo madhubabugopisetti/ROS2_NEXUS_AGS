@@ -41,11 +41,13 @@ def generate_launch_description():
         parameters=[{"robot_description": Command(["xacro ", xacro_file])}]
     )
 
-    # --- Clock bridge ---
-    clock_bridge = Node(
-        package="ros_gz_bridge",
-        executable="parameter_bridge",
-        arguments=["/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock"],
+    # --- bridge ---
+    bridge = ExecuteProcess(
+        cmd=[
+            "ros2", "run", "ros_gz_bridge", "parameter_bridge",
+            "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
+            "/camera/image@sensor_msgs/msg/Image[gz.msgs.Image",
+        ],
         output="screen"
     )
 
@@ -60,7 +62,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         gazebo,
-        clock_bridge,
+        bridge,
         rsp,
         spawn_robot,
         rviz

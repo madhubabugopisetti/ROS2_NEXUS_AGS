@@ -217,6 +217,23 @@
         </inertial>
     </link>
 
+    <!-- GRIPPER BASE to CAMERA -->
+    <joint name="camera_joint" type="fixed">
+        <parent link="gripper_base" />
+        <child link="camera_link" />
+        <origin xyz="0 0 0.08" rpy="0 -1.57 0" />
+    </joint>
+    <link name="camera_link">
+        <visual>
+            <geometry>
+                <box size="0.04 0.04 0.04" />
+            </geometry>
+            <material name="black">
+                <color rgba="0 0 0 1" />
+            </material>
+        </visual>
+    </link>
+
     <!-- GRIPPER BASE to LEFT FINGER -->
     <joint name="left_finger_joint" type="prismatic">
         <parent link="gripper_base" />
@@ -279,6 +296,29 @@
         </inertial>
     </link>
 
+    <!-- CAMERA PLUGIN -->
+    <gazebo reference="camera_link">
+        <sensor name="camera" type="camera">
+            <update_rate>30</update_rate>
+            <topic>camera/image</topic>
+            <camera>
+                <horizontal_fov>1.396</horizontal_fov>
+                <image>
+                    <width>640</width>
+                    <height>480</height>
+                    <format>R8G8B8</format>
+                </image>
+            </camera>
+        </sensor>
+    </gazebo>
+    <gazebo>
+        <plugin
+            filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+            <render_engine>ogre2</render_engine>
+        </plugin>
+    </gazebo>
+
     <!-- ================= ROS2 CONTROL ================= -->
     <ros2_control name="nexus_ags_controller" type="system">
         <hardware>
@@ -324,7 +364,8 @@
     <gazebo>
         <plugin filename="libgz_ros2_control-system.so"
             name="gz_ros2_control::GazeboSimROS2ControlPlugin">
-            <parameters>/home/madhu/ros2_nexus_ags_ws/install/ags_description/share/ags_description/config/controllers.yaml</parameters>
+            <parameters>
+                /home/madhu/ros2_nexus_ags_ws/install/ags_description/share/ags_description/config/controllers.yaml</parameters>
         </plugin>
     </gazebo>
 </robot>

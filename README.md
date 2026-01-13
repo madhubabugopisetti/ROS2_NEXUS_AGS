@@ -148,3 +148,29 @@ points:
 - Add a model in world.sdf
 - gz sim -r ~/ros2_nexus_ags_ws/src/ags_description/worlds/world.sdf
 - ![alt text](./src/images/image-7.png)
+
+### STEP 2: Add camera and see the object
+- Add camera link, joint and plugin **camera** in ags.xacro
+- Add **/camera** bridge
+- [BUILD](#build)
+- Terminal 1: ros2 launch ags_description gazebo_rviz.launch.py
+- Add Image and set topic as /camera/image
+- Terminal 2: ros2 control load_controller --set-state active joint_state_broadcaster / ros2 control load_controller --set-state active arm_controller
+- ![Camera pointing top](./src/images/image-8.png)
+- Terminal 3:
+```
+ros2 topic pub --once /arm_controller/joint_trajectory trajectory_msgs/msg/JointTrajectory "
+joint_names:
+- shoulder_joint
+- elbow_joint
+- forearm_joint
+- wrist_pitch_joint
+- wrist_roll_joint
+- left_finger_joint
+- right_finger_joint
+points:
+- positions: [1.6, 1.0, 1.5, 0.55, 0.0, 0.01, 0.01]
+  time_from_start: {sec: 3}
+"
+```
+- ![After rotating](./src/images/image-9.png)

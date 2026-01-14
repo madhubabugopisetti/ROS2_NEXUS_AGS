@@ -12,15 +12,13 @@ class AGSAlignShoulder(Node):
     def __init__(self):
         super().__init__("ags_align_shoulder")
 
-        # PID
-        self.Kp = 0.001
-        self.Ki = 0.0000
-        self.Kd = 0.0005
+        # === GAINS (similar style to forearm) ===
+        self.Kp = 0.0012
+        self.Kd = 0.0010
 
-        self.integral = 0.0
         self.prev_err = 0.0
 
-        self.max_step = 0.08
+        self.max_step = 0.05
 
         # Subs
         self.sub_img = self.create_subscription(Image, "/camera/image", self.image_cb, 10)
@@ -43,12 +41,9 @@ class AGSAlignShoulder(Node):
         self.joint_ready = False
 
         # Control
-        self.step = 0.05
-        self.deadzone = 5
-        self.prev_error = None
-        self.dir = 1
+        self.deadzone = 2   # pixels
 
-        self.get_logger().info("AGS align SHOULDER ONLY started")
+        self.get_logger().info("AGS align SHOULDER (Y AXIS, STABLE SERVO) started")
 
     def joint_cb(self, msg):
         if "shoulder_joint" in msg.name:
@@ -65,15 +60,17 @@ class AGSAlignShoulder(Node):
             return
 
         img = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
+        vis = img.copy()
+
         H, W, _ = img.shape
         icx = W // 2
         icy = H // 2
 
-        # Draw image center axes
-        cv2.line(img, (icx, 0), (icx, H), (0, 0, 255), 2)   # vertical (X)
-        cv2.line(img, (0, icy), (W, icy), (0, 255, 0), 2)  # horizontal (Y)
+        # Draw axes (VIS ONLY)
+        cv2.line(vis, (icx, 0), (icx, H), (0, 0, 255), 2)
+        cv2.line(vis, (0, icy), (W, icy), (0, 255, 0), 2)
 
-        # Detect red box
+        # Detect red (ON CLEAN IMAGE)
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         lower1 = (0, 120, 70)
         upper1 = (10, 255, 255)
@@ -83,41 +80,29 @@ class AGSAlignShoulder(Node):
         mask = cv2.inRange(hsv, lower1, upper1) | cv2.inRange(hsv, lower2, upper2)
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        # Filter small junk
         contours = [c for c in contours if cv2.contourArea(c) > 500]
 
         if not contours:
-            cv2.imshow("align_shoulder", img)
+            cv2.imshow("align_shoulder", vis)
             cv2.waitKey(1)
             return
 
-        # Pick biggest
         c = max(contours, key=cv2.contourArea)
+
         x, y, bw, bh = cv2.boundingRect(c)
-
-        # Reject crazy tall shapes (robot arm, shadow, etc)
-        if bh > 2 * bw:
-            cv2.imshow("align_shoulder", img)
-            cv2.waitKey(1)
-            return
-
-        # Draw box
-        cv2.rectangle(img, (x, y), (x + bw, y + bh), (0, 255, 0), 2)
-
         box_cx = x + bw // 2
         box_cy = y + bh // 2
 
-        # Draw center dot
-        cv2.circle(img, (box_cx, box_cy), 5, (0, 255, 0), -1)
+        # Draw detection (VIS ONLY)
+        cv2.rectangle(vis, (x, y), (x + bw, y + bh), (0, 255, 0), 2)
+        cv2.circle(vis, (box_cx, box_cy), 5, (0, 255, 0), -1)
 
-        # Errors
         err_x = box_cx - icx
         err_y = box_cy - icy
 
-        # Show errors
         cv2.putText(
-            img,
-            f"err_x: {err_x}  err_y: {err_y}",
+            vis,
+            f"ex={err_x} ey={err_y}",
             (10, 30),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.7,
@@ -125,48 +110,33 @@ class AGSAlignShoulder(Node):
             2,
         )
 
-        # ========== YOUR CONTROL USES Y ERROR ==========
+        # === CONTROL ERROR (Y ONLY) ===
         err = err_y
 
-        # Check centered
+        # === DEADZONE ===
         if abs(err) < self.deadzone:
-            self.get_logger().info("Y CENTERED. Stopping shoulder.")
-            cv2.imshow("align_shoulder", img)
-            cv2.waitKey(1)
-            return
+            u = 0.0
+            self.prev_err = 0.0
+        else:
+            derr = err - self.prev_err
+            self.prev_err = err
+            u = self.Kp * err + self.Kd * derr
 
-        # PID
-        self.integral += err
-        derivative = err - self.prev_err
-        self.prev_err = err
+        # === CLAMP STEP ===
+        u = max(-self.max_step, min(self.max_step, u))
 
-        u = self.Kp * err + self.Ki * self.integral + self.Kd * derivative
+        # === APPLY (NOTE THE SIGN!) ===
+        self.shoulder -= u   # <-- SIGN FIX (THIS IS THE KEY)
 
-        # Clamp
-        if u > self.max_step:
-            u = self.max_step
-        if u < -self.max_step:
-            u = -self.max_step
-
-        # Direction safety (your old logic)
-        if self.prev_error is not None:
-            if abs(err) > self.prev_error:
-                self.dir *= -1
-
-        self.prev_error = abs(err)
-
-        # Apply
-        self.shoulder += u * self.dir
+        # Safety clamp (optional)
+        self.shoulder = max(-3.14, min(3.14, self.shoulder))
 
         self.send_joints()
 
-
-        cv2.imshow("align_shoulder", img)
+        cv2.imshow("align_shoulder", vis)
         cv2.waitKey(1)
 
     def send_joints(self):
-        # ONLY SHOULDER MOVES
-
         traj = JointTrajectory()
         traj.joint_names = [
             "shoulder_joint",
@@ -186,7 +156,7 @@ class AGSAlignShoulder(Node):
             self.wrist_pitch,
             self.wrist_roll,
             self.left_finger,
-            self.right_finger
+            self.right_finger,
         ]
 
         p.time_from_start.sec = 1

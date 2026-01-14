@@ -41,7 +41,7 @@ class AGSAlignForearmX(Node):
         self.joint_ready = False
 
         # Control
-        self.deadzone = 6   # pixels
+        self.deadzone = 2   # pixels
         self.deadzone_y = 6
 
         self.get_logger().info("AGS align FOREARM X (STABLE SERVO) started")

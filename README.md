@@ -248,3 +248,7 @@ chmod +x align_forearm.py
 - ![aling y axis](./src/images/image-13.png)
 - Terminal 6: ros2 run ags_auto align_forearm
 - ![align x axis](./src/images/image-14.png)
+
+# Added PID to both forearm and shoulder
+![Perfect shoulder](./src/images/image-15.png)
+![Perfect forearm](./src/images/image-16.png)

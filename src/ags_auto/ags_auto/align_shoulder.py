@@ -83,14 +83,23 @@ class AGSAlignShoulder(Node):
         mask = cv2.inRange(hsv, lower1, upper1) | cv2.inRange(hsv, lower2, upper2)
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+        # Filter small junk
+        contours = [c for c in contours if cv2.contourArea(c) > 500]
+
         if not contours:
             cv2.imshow("align_shoulder", img)
             cv2.waitKey(1)
             return
 
-        # Biggest contour
+        # Pick biggest
         c = max(contours, key=cv2.contourArea)
         x, y, bw, bh = cv2.boundingRect(c)
+
+        # Reject crazy tall shapes (robot arm, shadow, etc)
+        if bh > 2 * bw:
+            cv2.imshow("align_shoulder", img)
+            cv2.waitKey(1)
+            return
 
         # Draw box
         cv2.rectangle(img, (x, y), (x + bw, y + bh), (0, 255, 0), 2)

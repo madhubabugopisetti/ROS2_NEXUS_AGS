@@ -28,6 +28,9 @@ setup(
             'search_box = ags_auto.search_box:main',
             'align_shoulder = ags_auto.align_shoulder:main',
             'align_forearm = ags_auto.align_forearm:main',
+            'align_elbow = ags_auto.align_elbow:main',
+            'search_align_shoulder = ags_auto.search_align_shoulder:main',
+            'align_forearm_elbow = ags_auto.align_forearm_elbow:main',
         ],
     },
 )

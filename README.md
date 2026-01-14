@@ -249,6 +249,38 @@ chmod +x align_forearm.py
 - Terminal 6: ros2 run ags_auto align_forearm
 - ![align x axis](./src/images/image-14.png)
 
-# Added PID to both forearm and shoulder
+# GOAL 7 : Align elbow
+```
+cd ~/ros2_nexus_ags_ws/src/ags_auto/ags_auto
+touch align_elbow.py
+chmod +x align_elbow.py
+```
+- Add to console_scripts ```'align_elbow = ags_auto.align_elbow:main',```
+
+# Added PID to both forearm and shoulder and elbow
 ![Perfect shoulder](./src/images/image-15.png)
 ![Perfect forearm](./src/images/image-16.png)
+
+# GOAL 8 - 1: Search + align Shoulder
+```
+cd ~/ros2_nexus_ags_ws/src/ags_auto/ags_auto
+touch search_align_shoulder.py
+chmod +x search_align_shoulder.py
+```
+- Add to console_scripts ```'search_align_shoulder = ags_auto.search_align_shoulder:main',```
+
+# GOAL 8 - 2: Align elbow + Forearm
+```
+cd ~/ros2_nexus_ags_ws/src/ags_auto/ags_auto
+touch align_forearm_elbow.py
+chmod +x align_forearm_elbow.py
+```
+- Add to console_scripts ```'align_forearm_elbow = ags_auto.align_forearm_elbow:main',```
+- [BUILD](#build)
+- Terminal 1: ros2 launch ags_description gazebo_rviz.launch.py
+- ![Before searching](./src/images/image-11.png)
+- Terminal 2: ros2 run ags_auto search_align_shoulder
+- ![alt text](./src/images/image-17.png)
+- Terminal 3: ros2 run ags_auto align_forearm_elbow
+- ![Iteration - 1](./src/images/image-18.png)
+- ![Iteration - 17](./src/images/image-19.png)

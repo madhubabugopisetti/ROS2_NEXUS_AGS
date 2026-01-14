@@ -116,6 +116,9 @@ class AGS(Node):
         x,y,wc,hc = cv2.boundingRect(c)
         bx = x + wc//2
         by = y + hc//2
+        err_x = bx - cx
+        err_y = by - cy
+        cv2.putText( vis, f"err_x={err_x}  err_y={err_y}", (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
         cv2.rectangle(vis,(x,y),(x+wc,y+hc),(0,255,0),2)
         cv2.circle(vis,(bx,by),4,(0,255,0),-1)
         self.box_found = True

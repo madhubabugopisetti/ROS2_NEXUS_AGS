@@ -11,6 +11,7 @@ import numpy as np
 class AGSSearchBox(Node):
     def __init__(self):
         super().__init__("ags_search_box")
+        self.stopped = False
         self.sub = self.create_subscription(Image, "/camera/image", self.image_cb, 10)
         self.pub = self.create_publisher(JointTrajectory, "/arm_controller/joint_trajectory", 10)
         self.bridge = CvBridge()
@@ -57,16 +58,26 @@ class AGSSearchBox(Node):
         self.pub.publish(msg)
 
     def control_loop(self):
+        if self.stopped:
+            return
+
         if not self.box_found:
-            self.shoulder += 0.1
+            self.shoulder += 0.05
             if self.shoulder > 3.14:
                 self.shoulder = -3.14
 
             self.get_logger().info(f"Searching... shoulder = {self.shoulder:.2f}")
             self.send_joints(self.shoulder)
+
         else:
             self.get_logger().info("BOX FOUND! Stopping.")
+
+            # SEND HOLD COMMAND (critical)
+            self.send_joints(self.shoulder)
+
+            self.stopped = True
             self.timer.cancel()
+
 
 def main():
     rclpy.init()

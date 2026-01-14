@@ -60,10 +60,21 @@ def generate_launch_description():
         output="screen"
     )
 
+    load_jsb = ExecuteProcess(
+        cmd=["ros2", "control", "load_controller", "--set-state", "active", "joint_state_broadcaster"],
+        output="screen"
+    )
+
+    load_arm = ExecuteProcess(
+        cmd=["ros2", "control", "load_controller", "--set-state", "active", "arm_controller"],
+        output="screen"
+    )
+
     return LaunchDescription([
         gazebo,
         bridge,
         rsp,
         spawn_robot,
-        rviz
+        TimerAction(period=6.0, actions=[load_jsb]),
+        TimerAction(period=7.0, actions=[load_arm]),
     ])

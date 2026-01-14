@@ -12,6 +12,16 @@ class AGSAlignShoulder(Node):
     def __init__(self):
         super().__init__("ags_align_shoulder")
 
+        # PID
+        self.Kp = 0.001
+        self.Ki = 0.0000
+        self.Kd = 0.0005
+
+        self.integral = 0.0
+        self.prev_err = 0.0
+
+        self.max_step = 0.08
+
         # Subs
         self.sub_img = self.create_subscription(Image, "/camera/image", self.image_cb, 10)
         self.sub_js = self.create_subscription(JointState, "/joint_states", self.joint_cb, 10)
@@ -35,8 +45,8 @@ class AGSAlignShoulder(Node):
         # Control
         self.step = 0.05
         self.deadzone = 5
-        self.prev_error_x = None
-        self.dir_x = 1
+        self.prev_error = None
+        self.dir = 1
 
         self.get_logger().info("AGS align SHOULDER ONLY started")
 
@@ -55,11 +65,13 @@ class AGSAlignShoulder(Node):
             return
 
         img = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
-        h, w, _ = img.shape
-        cy = h // 2   # <-- FIXED
+        H, W, _ = img.shape
+        icx = W // 2
+        icy = H // 2
 
-        # Draw center line (HORIZONTAL)
-        cv2.line(img, (0, cy), (w, cy), (0,255,0), 2)
+        # Draw image center axes
+        cv2.line(img, (icx, 0), (icx, H), (0, 0, 255), 2)   # vertical (X)
+        cv2.line(img, (0, icy), (W, icy), (0, 255, 0), 2)  # horizontal (Y)
 
         # Detect red box
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -76,7 +88,7 @@ class AGSAlignShoulder(Node):
             cv2.waitKey(1)
             return
 
-        # Biggest
+        # Biggest contour
         c = max(contours, key=cv2.contourArea)
         x, y, bw, bh = cv2.boundingRect(c)
 
@@ -86,9 +98,26 @@ class AGSAlignShoulder(Node):
         box_cx = x + bw // 2
         box_cy = y + bh // 2
 
+        # Draw center dot
         cv2.circle(img, (box_cx, box_cy), 5, (0, 255, 0), -1)
 
-        err = box_cy - cy   # <-- THIS is the error we use now
+        # Errors
+        err_x = box_cx - icx
+        err_y = box_cy - icy
+
+        # Show errors
+        cv2.putText(
+            img,
+            f"err_x: {err_x}  err_y: {err_y}",
+            (10, 30),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.7,
+            (0, 255, 0),
+            2,
+        )
+
+        # ========== YOUR CONTROL USES Y ERROR ==========
+        err = err_y
 
         # Check centered
         if abs(err) < self.deadzone:
@@ -97,29 +126,37 @@ class AGSAlignShoulder(Node):
             cv2.waitKey(1)
             return
 
-        # Init
-        if self.prev_error_x is None:
-            self.prev_error_x = abs(err)
-            self.move_joints()
-            cv2.imshow("align_shoulder", img)
-            cv2.waitKey(1)
-            return
+        # PID
+        self.integral += err
+        derivative = err - self.prev_err
+        self.prev_err = err
 
-        # Direction check
-        if abs(err) > self.prev_error_x:
-            self.dir_x *= -1
+        u = self.Kp * err + self.Ki * self.integral + self.Kd * derivative
 
-        self.prev_error_x = abs(err)
+        # Clamp
+        if u > self.max_step:
+            u = self.max_step
+        if u < -self.max_step:
+            u = -self.max_step
 
-        self.move_joints()
+        # Direction safety (your old logic)
+        if self.prev_error is not None:
+            if abs(err) > self.prev_error:
+                self.dir *= -1
+
+        self.prev_error = abs(err)
+
+        # Apply
+        self.shoulder += u * self.dir
+
+        self.send_joints()
+
 
         cv2.imshow("align_shoulder", img)
         cv2.waitKey(1)
 
-
-    def move_joints(self):
+    def send_joints(self):
         # ONLY SHOULDER MOVES
-        self.shoulder += self.dir_x * self.step
 
         traj = JointTrajectory()
         traj.joint_names = [
@@ -135,8 +172,8 @@ class AGSAlignShoulder(Node):
         p = JointTrajectoryPoint()
         p.positions = [
             self.shoulder,
-            self.elbow,       # stays same
-            self.forearm,     # stays same
+            self.elbow,
+            self.forearm,
             self.wrist_pitch,
             self.wrist_roll,
             self.left_finger,

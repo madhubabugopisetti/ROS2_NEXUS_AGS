@@ -65,7 +65,8 @@ touch ags_description/urdf/ags.xacro
 - Add folder config, launch, urdf, worlds, rviz, maps to CMakeLists.txt
 - Add world, walls in world.sdf
 - Add gazebo node in gazebo_rviz.launch.py
-- Terminal 1: ros2 launch ags_description gazebo_rviz.launch.py
+- Terminal 1: gz sim -r ~/ros2_nexus_ags_ws/src/ags_description/worlds/world.sdf<br />
+- Terminal 2: ros2 launch ags_description gazebo_rviz.launch.py
 - ![world](./src/images/image.png)
 
 ### STEP 4: Create model and render in gazebo
@@ -261,7 +262,7 @@ chmod +x align_elbow.py
 ![Perfect shoulder](./src/images/image-15.png)
 ![Perfect forearm](./src/images/image-16.png)
 
-# GOAL 8 - 1: Search + align Shoulder
+# GOAL 8 - 1: Align X-AXIS with PID
 ```
 cd ~/ros2_nexus_ags_ws/src/ags_auto/ags_auto
 touch search_align_shoulder.py
@@ -269,7 +270,7 @@ chmod +x search_align_shoulder.py
 ```
 - Add to console_scripts ```'search_align_shoulder = ags_auto.search_align_shoulder:main',```
 
-# GOAL 8 - 2: Align elbow + Forearm
+# GOAL 8 - 2: Aling Y-AXIS with PID
 ```
 cd ~/ros2_nexus_ags_ws/src/ags_auto/ags_auto
 touch align_forearm_elbow.py
@@ -284,3 +285,47 @@ chmod +x align_forearm_elbow.py
 - Terminal 3: ros2 run ags_auto align_forearm_elbow
 - ![Iteration - 1](./src/images/image-18.png)
 - ![Iteration - 17](./src/images/image-19.png)
+
+# GOAL 8 - 3: Align Z AXIS with PID
+- We now remove iterations and replace with z axis
+- Add z axis - size of box from camera
+- Move elbow -> align forearm + wrist roll -> loop till it reaches (box width - fingers height)
+- And stop
+- [BUILD](#build)
+- Terminal 1: ros2 launch ags_description gazebo_rviz.launch.py (y axis using PID)
+- Terminal 2: ros2 run ags_auto search_align_shoulder
+- ![Aligned Shoulder](./src/images/image-20.png)
+- Terminal 3: ros2 run ags_auto align_forearm_elbow
+- ![Initial](./src/images/image-21.png)
+- ![After Z Stops](./src/images/image-22.png)
+- Terminal 3: to know your current joints ```ros2 topic echo /joint_states --once```
+```
+ros2 topic pub --once /arm_controller/joint_trajectory trajectory_msgs/msg/JointTrajectory "
+joint_names:
+- elbow_joint
+- forearm_joint
+- left_finger_joint
+- right_finger_joint
+- shoulder_joint![alt text](image.png)
+- wrist_pitch_joint
+- wrist_roll_joint
+points:
+- positions: [-1.3239188768052006, -0.6104083335594573, 0.010000000000003157, 0.009999999999996843, 1.5685897503683273, -1.200000000000036, 8.834158075814173e-74,]
+  time_from_start: {sec: 3}
+"
+```
+
+# GOAL 8 - 4: Pick the object
+- After reaching the point, lets extend elobw along with forerm
+- Open grip, move elbow, with same speed of forearm, close the grip and lift it
+- [BUILD](#build)
+- Terminal 1: ros2 launch ags_description gazebo_rviz.launch.py (y axis using PID)
+- Terminal 2: ros2 run ags_auto search_align_shoulder
+- ![Aligned Shoulder](./src/images/image-20.png)
+- Terminal 3: ros2 run ags_auto align_forearm_elbow
+- ![Initial](./src/images/image-21.png)
+- ![After Z Stops](./src/images/image-22.png)
+- ![To Pick](./src/images/image-23.png)
+- ![Picked](./src/images/image-24.png)
+
+

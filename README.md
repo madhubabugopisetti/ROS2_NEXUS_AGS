@@ -1,4 +1,8 @@
 # ROS2_NEXUS_AGS
+- ![Initial](./src/images/image-21.png)
+- ![After Z Stops](./src/images/image-22.png)
+- ![To Pick](./src/images/image-23.png)
+- ![Picked](./src/images/image-24.png)
 
 ## Installation
 - ROS2 JAZZY: https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html
